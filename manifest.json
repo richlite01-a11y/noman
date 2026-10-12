@@ -1,0 +1,21 @@
+{
+  "name": "NOMAN APPS",
+  "short_name": "NOMAN APPS",
+  "start_url": "/PNB-Apps/",
+  "scope": "/PNB-Apps/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffbf00",
+  "icons": [
+    {
+      "src": "/PNB-Apps/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/PNB-Apps/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
