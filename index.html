@@ -1251,7 +1251,19 @@
             border-radius: 40px;
         }
         h3 { font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 10px; }
-    </style>
+    
+        /* Calculator-only profile layout */
+        #profileScreen .profile-stats > .setting-row,
+        #profileScreen .mode-toggle,
+        #profileScreen #denominationSection,
+        #profileScreen .stats-row,
+        #profileScreen #recycleBinSection,
+        #profileScreen .kb-hint,
+        #profileScreen .note-actions,
+        #profileScreen #savedNotesContainer { display: none !important; }
+        #profileScreen .simple-calc-section { margin-top: 12px; }
+        #profileScreen .calc-header { justify-content: flex-start; }
+</style>
 </head>
 <body>
 <div class="app-main">
@@ -1332,7 +1344,7 @@
             <!-- ===== CALCULATOR WITH PHOTO NAME ===== -->
             <div class="simple-calc-section" id="calculatorSection">
                 <div class="calc-header">
-                    <h4>🧮 Calculator & Notes</h4>
+                    <h4>🧮 Calculator</h4>
                 </div>
                 <div class="calc-display" id="calcDisplay">
                     <span class="expr" id="calcExpr"></span>
@@ -1416,7 +1428,6 @@
             <div class="recycle-section" id="recycleBinSection">
                 <div class="recycle-header">
                     <span>🗑️ Recently Deleted</span>
-                    <button class="recycle-clear-all" id="clearRecycleBtn">Clear All</button>
                 </div>
                 <div id="recycleListContainer"></div>
             </div>
@@ -1685,7 +1696,6 @@
         closeRestoreModal();
     });
 
-    document.getElementById('clearRecycleBtn').addEventListener('click', clearRecycleBin);
 
     // ===== TOGGLE =====
     let currentMode = 'calculator';
