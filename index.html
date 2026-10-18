@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Noman Power Tools - Premium Inventory</title>
-    <link rel="manifest" href="/noman/manifest.json">
-    <link rel="icon" type="image/png" sizes="192x192" href="/noman/icon-192.png">
-    <meta name="theme-color" content="#ffbf00">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background: #f5f7fb; padding-bottom: 85px; }
@@ -110,8 +107,10 @@
         
         .search-bar { background: #f1f5f9; border-radius: 30px; padding: 12px 18px; display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
         .search-bar input { background: none; border: none; flex: 1; font-size: 15px; outline: none; }
-        .category-chips { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 16px; margin-bottom: 8px; white-space: nowrap; }
-        .chip { background: #f1f5f9; padding: 8px 20px; border-radius: 40px; font-size: 14px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.1s; }
+        .category-chips { display: flex; gap: 12px; overflow-x: auto; padding: 4px 2px 18px; margin-bottom: 8px; white-space: nowrap; align-items: center; scrollbar-width: thin; }
+        .chip { background: #f1f5f9; padding: 10px 20px 10px 12px; min-height: 82px; border-radius: 42px; font-size: 16px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 12px; transition: 0.1s; flex: 0 0 auto; }
+        .chip > img { width: 62px !important; height: 62px !important; object-fit: cover; border-radius: 14px !important; vertical-align: middle; margin-right: 2px !important; flex-shrink: 0; }
+        .chip .delete-chip { font-size: 15px; padding: 6px; }
         .chip.active { background: #dbeafe; color: #1e3a8a; }
         .chip .delete-chip { background: none; border: none; cursor: pointer; font-size: 11px; opacity: 0.6; margin-left: 4px; color: inherit; }
         
@@ -1101,9 +1100,11 @@
             cursor: pointer;
             flex: 1;
         }
-        .icon-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 16px 0; }
-        .icon-option { aspect-ratio: 1; background: #f8fafc; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; border: 2px solid transparent; }
-        .icon-option.selected { border-color: #001959; background: #eef2ff; }
+        .icon-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin: 16px 0; max-height: 330px; overflow-y: auto; padding: 2px; }
+        .icon-option { min-height: 74px; padding: 7px 3px; background: #f8fafc; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 27px; cursor: pointer; border: 2px solid transparent; text-align: center; }
+        .icon-option .icon-label { font-size: 9px; line-height: 1.15; font-weight: 700; color: #334155; overflow-wrap: anywhere; }
+        .icon-option.selected { border-color: #001959; background: #eef2ff; box-shadow: 0 0 0 1px #001959 inset; }
+        @media (max-width: 360px) { .icon-grid { gap: 6px; } .icon-option { min-height: 68px; font-size: 24px; } .icon-option .icon-label { font-size: 8px; } }
         .image-upload-area { border: 2px dashed #cbd5e1; border-radius: 25px; padding: 12px; text-align: center; cursor: pointer; margin-top: 8px; }
         .image-preview-sm { width: 80px; height: 80px; border-radius: 14px; object-fit: cover; margin: 8px auto; }
         .toast-msg {
@@ -1448,7 +1449,9 @@
         </div>
     </div>
 
-    <div id="categoryModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">📁 New Category</div><input type="text" id="newCategoryName" class="modal-input" placeholder="Category name"><div class="icon-grid" id="iconGrid"></div><input type="text" id="customIconInput" class="modal-input" placeholder="Or enter your own emoji" maxlength="2"><div style="display:flex; gap:12px;"><button class="btn-cancel" onclick="closeCategoryModal()">Cancel</button><button class="btn-primary" id="saveCategoryBtn">Save</button></div></div></div>
+    <div id="categoryModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">📁 New Category</div><input type="text" id="newCategoryName" class="modal-input" placeholder="Category name" maxlength="60">
+        <label for="categoryImageFile" class="image-upload-area" style="display:block; margin:10px 0; color:#334155;">🖼️ Upload Category Image (optional)<input type="file" id="categoryImageFile" accept="image/*" style="display:none"><div id="categoryImagePreview"></div><small>Image choose karein; category mein ye image dikhegi.</small></label>
+        <div style="display:flex; gap:12px; margin-top:12px;"><button class="btn-cancel" onclick="closeCategoryModal()">Cancel</button><button class="btn-primary" id="saveCategoryBtn">Save Category</button></div></div></div>
     <div id="deleteCategoryModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">Delete Category?</div><div id="deleteCategoryName"></div><div style="display:flex; gap:12px;"><button class="btn-cancel" onclick="closeDeleteModal()">Cancel</button><button class="btn-primary" id="confirmDeleteCatBtn">Delete</button></div></div></div>
     <div id="deleteProductModal" class="modal-overlay"><div class="modal-card"><div class="modal-title">Delete Product?</div><div id="deleteProductName"></div><div style="display:flex; gap:12px;"><button class="btn-cancel" onclick="closeDeleteProductModal()">Cancel</button><button class="btn-primary" id="confirmDeleteProdBtn">Delete</button></div></div></div>
 
@@ -1932,19 +1935,31 @@
     // ===== CASH DENOMINATION =====
     // ============================================================
     
-    // ===== DENOMINATION PICTURES =====
-    const noteImages = {
-        2000: 'https://cdn.phototourl.com/free/2026-07-16-f46ca8b3-e694-48e1-8375-b2377a30bfc8.jpg',
-        500: 'https://iili.io/CjHzkSj.jpg',
-        200: 'https://cdn.phototourl.com/free/2026-07-16-701ae87b-0016-477c-860b-129e59a7afd0.jpg',
-        100: 'https://cdn.phototourl.com/free/2026-07-16-6eb640f6-6e21-4768-97c3-91df5d8076b8.jpg',
-        50: 'https://cdn.phototourl.com/free/2026-07-16-8e2928a4-5ee1-423c-8b95-4fee9d0c6272.jpg',
-        20: 'https://iili.io/CjHIgdG.jpg',
-        10: 'https://iili.io/Ch5hq3x.jpg',
-        5: 'https://cdn.phototourl.com/free/2026-07-16-d428bdf6-06fa-4995-99b5-6159edde0aea.jpg',
-        2: 'https://cdn.phototourl.com/free/2026-07-16-88d524a8-2cef-40dc-bab6-4156eadcbb94.jpg',
-        1: 'https://cdn.phototourl.com/free/2026-07-16-28e6f9e1-52f6-4822-8d02-ac6f9177de66.jpg'
-    };
+    // ===== DENOMINATION PICTURES (LOCAL SVG - NO BROKEN REMOTE LINKS) =====
+    // Generate a clear denomination thumbnail for every note/coin so images
+    // remain visible even when external image hosts are unavailable.
+    function makeDenominationImage(value) {
+        const isCoin = [10, 5, 2, 1].includes(Number(value));
+        const colors = {
+            2000: ['#b76aa8', '#f8e9f5'],
+            500: ['#9b9b9b', '#f4f4f4'],
+            200: ['#d89b24', '#fff4d6'],
+            100: ['#a878bb', '#f6eafa'],
+            50: ['#79a9d2', '#eaf5ff'],
+            20: ['#d98255', '#fff0e7'],
+            10: ['#a5a5a5', '#f7f7f7'],
+            5: ['#b7a27b', '#fff7e8'],
+            2: ['#a8adb5', '#f5f6f8'],
+            1: ['#c9a46a', '#fff7e8']
+        };
+        const pair = colors[value] || ['#94a3b8', '#f8fafc'];
+        const accent = pair[0], pale = pair[1];
+        const svg = isCoin
+            ? `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="0 0 240 120"><rect width="240" height="120" rx="12" fill="#eef2f7"/><circle cx="120" cy="60" r="47" fill="${accent}" stroke="#6b7280" stroke-width="3"/><circle cx="120" cy="60" r="38" fill="${pale}" stroke="#6b7280" stroke-width="2"/><text x="120" y="54" text-anchor="middle" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#263238">₹${value}</text><text x="120" y="73" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#263238">INDIA</text></svg>`
+            : `<svg xmlns="http://www.w3.org/2000/svg" width="240" height="120" viewBox="0 0 240 120"><rect x="3" y="3" width="234" height="114" rx="8" fill="${pale}" stroke="${accent}" stroke-width="5"/><rect x="10" y="10" width="220" height="100" rx="5" fill="none" stroke="${accent}" stroke-width="1.5" stroke-dasharray="4 3"/><circle cx="53" cy="60" r="27" fill="${accent}" opacity=".25" stroke="${accent}" stroke-width="2"/><circle cx="53" cy="60" r="18" fill="none" stroke="${accent}" stroke-width="1.5"/><text x="53" y="65" text-anchor="middle" font-family="Arial,sans-serif" font-size="13" font-weight="700" fill="#263238">₹</text><text x="145" y="33" text-anchor="middle" font-family="Arial,sans-serif" font-size="10" font-weight="700" fill="#263238">RESERVE BANK OF INDIA</text><text x="145" y="68" text-anchor="middle" font-family="Arial,sans-serif" font-size="30" font-weight="700" fill="${accent}">₹${value}</text><text x="145" y="88" text-anchor="middle" font-family="Arial,sans-serif" font-size="9" fill="#263238">SPECIMEN • DENOMINATION</text></svg>`;
+        return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+    }
+    const noteImages = Object.fromEntries([2000, 500, 200, 100, 50, 20, 10, 5, 2, 1].map(value => [value, makeDenominationImage(value)]));
 
     const denominations = [
         { value: 2000, label: '₹2000 Note', icon: noteImages[2000] },
@@ -2250,7 +2265,8 @@
             else { const p = localStorage.getItem("aamir_products_backup"), c = localStorage.getItem("aamir_categories_backup"); if (p) products = JSON.parse(p); if (c) categories = JSON.parse(c); if (categories.length || products.length) syncToFirestore(); else setDoc(doc(db, "inventory", "master"), { categories: [], products: [] }); renderAll(); }
         });
     }
-    async function addCategory(n, i) { const id = Date.now()+Math.random().toString(36).substr(2,5); categories.push({ id, name:n, icon:i }); await syncToFirestore(); renderAll(); showToast(`✅ Category "${n}" added`); }
+    async function addCategory(n, i, imageUrl=null) { const id = Date.now()+Math.random().toString(36).substr(2,5); categories.push({ id, name:n, icon:i, image:imageUrl }); await syncToFirestore(); renderAll(); showToast(`✅ Category "${n}" added`); }
+    function categoryVisual(c){ return c && c.image ? `<img src="${c.image}" alt="${c.name || 'Category'}" style="width:62px;height:62px;object-fit:cover;border-radius:14px;vertical-align:middle;margin-right:2px;">` : (c?.icon || '📦'); }
     async function addProduct(pd, imgUrl) { const id = Date.now()+Math.random().toString(36).substr(2,5); products.unshift({ ...pd, id, stock:100, imageUrl: imgUrl || null }); await syncToFirestore(); renderAll(); showToast("✅ Product saved!"); }
     async function updateProduct(id, up, imgUrl) { const idx = products.findIndex(p => p.id === id); if (idx !== -1) { products[idx] = { ...products[idx], ...up }; if (imgUrl !== undefined) products[idx].imageUrl = imgUrl; await syncToFirestore(); renderAll(); showToast("✅ Updated"); } }
     function updateProfileStats() {
@@ -2259,7 +2275,7 @@
     }
     function renderCategoryChips() {
         let html = `<div class="chip ${currentFilter==='All'?'active':''}" data-cat="All">All</div><div class="chip ${currentFilter==='null'?'active':''}" data-cat="null">📂 Uncategorized</div>`;
-        html += categories.map(c => `<div class="chip ${currentFilter===c.id?'active':''}" data-cat="${c.id}">${c.icon||'📦'} ${c.name}<button class="delete-chip" onclick="event.stopPropagation(); window.showDeleteModal('${c.id}')">🗑️</button></div>`).join('');
+        html += categories.map(c => `<div class="chip ${currentFilter===c.id?'active':''}" data-cat="${c.id}">${categoryVisual(c)} ${c.name}<button class="delete-chip" onclick="event.stopPropagation(); window.showDeleteModal('${c.id}')">🗑️</button></div>`).join('');
         document.getElementById("categoryChips").innerHTML = html;
         document.querySelectorAll(".chip").forEach(ch => ch.addEventListener("click", (e) => { if(e.target.closest('.delete-chip')) return; currentFilter = ch.getAttribute("data-cat"); renderHomeProducts(); }));
     }
@@ -2342,7 +2358,7 @@
         if(id === 'profile') { updateProfileStats(); renderRecycleBin(); renderSavedNotes(); }
     }
     
-    document.getElementById("openProductBtn").onclick = () => { if(categories.length===0){ showToast("Please add a category first"); return; } document.getElementById("addProductInitialView").style.display="none"; document.getElementById("addProductCategoryView").style.display="block"; document.getElementById("categorySelectorList").innerHTML = categories.map(c => `<div class="category-item" data-cat-id="${c.id}">${c.icon||'📦'} ${c.name}</div>`).join(''); document.querySelectorAll(".category-item").forEach(item => item.addEventListener("click", ()=>{ selectedCategoryId = item.getAttribute("data-cat-id"); editingProductId=null; const catName = categories.find(c=>c.id===selectedCategoryId).name; document.getElementById("selectedCategoryDisplay").innerHTML = `📁 Selected: ${catName}`; document.getElementById("addProductCategoryView").style.display="none"; document.getElementById("addProductFormView").style.display="block"; document.getElementById("prodName").value=""; document.getElementById("prodPurchasePrice").value=""; document.getElementById("prodSellingPrice").value=""; document.getElementById("prodMrp").value=""; document.getElementById("imgPreviewContainer").innerHTML=""; document.getElementById("prodImageFile").value=""; })); };
+    document.getElementById("openProductBtn").onclick = () => { if(categories.length===0){ showToast("Please add a category first"); return; } document.getElementById("addProductInitialView").style.display="none"; document.getElementById("addProductCategoryView").style.display="block"; document.getElementById("categorySelectorList").innerHTML = categories.map(c => `<div class="category-item" data-cat-id="${c.id}">${categoryVisual(c)} ${c.name}</div>`).join(''); document.querySelectorAll(".category-item").forEach(item => item.addEventListener("click", ()=>{ selectedCategoryId = item.getAttribute("data-cat-id"); editingProductId=null; const catName = categories.find(c=>c.id===selectedCategoryId).name; document.getElementById("selectedCategoryDisplay").innerHTML = `📁 Selected: ${catName}`; document.getElementById("addProductCategoryView").style.display="none"; document.getElementById("addProductFormView").style.display="block"; document.getElementById("prodName").value=""; document.getElementById("prodPurchasePrice").value=""; document.getElementById("prodSellingPrice").value=""; document.getElementById("prodMrp").value=""; document.getElementById("imgPreviewContainer").innerHTML=""; document.getElementById("prodImageFile").value=""; })); };
     document.getElementById("backToInitialViewBtn").onclick = () => { document.getElementById("addProductInitialView").style.display="block"; document.getElementById("addProductCategoryView").style.display="none"; };
     document.getElementById("backToCategoryListViewBtn").onclick = () => { document.getElementById("addProductFormView").style.display="none"; document.getElementById("addProductCategoryView").style.display="block"; };
     document.getElementById("cancelProductBtn").onclick = () => { document.getElementById("addProductFormView").style.display="none"; document.getElementById("addProductCategoryView").style.display="block"; };
@@ -2365,12 +2381,11 @@
         document.getElementById("addProductInitialView").style.display="block";
     };
     document.getElementById("prodImageFile").onchange = e => { let f = e.target.files[0]; if(f){ let reader = new FileReader(); reader.onload = ev => document.getElementById("imgPreviewContainer").innerHTML = `<img src="${ev.target.result}" class="image-preview-sm">`; reader.readAsDataURL(f); } };
-    let selectedIcon = "📦";
-    const emojiList = ["🛠️","🔧","🔩","⚙️","🔨","🧰","⚡","🪜","🪓","⛏️","🗜️","🔌","🧲","🏗️"];
-    function buildIconGrid(){ let g=document.getElementById("iconGrid"); g.innerHTML=""; emojiList.forEach(icon=>{ let d=document.createElement("div"); d.className="icon-option"; if(icon===selectedIcon) d.classList.add("selected"); d.textContent=icon; d.addEventListener("click",()=>{ document.querySelectorAll("#iconGrid .icon-option").forEach(o=>o.classList.remove("selected")); d.classList.add("selected"); selectedIcon=icon; }); g.appendChild(d); }); }
-    window.openAddCategoryModal = () => { document.getElementById("newCategoryName").value=""; selectedIcon="📦"; buildIconGrid(); document.getElementById("categoryModal").style.display="flex"; };
+    // Category creation uses an optional uploaded image; no preset icon grid is shown.
+    window.openAddCategoryModal = () => { document.getElementById("newCategoryName").value=""; document.getElementById("categoryImageFile").value=""; document.getElementById("categoryImagePreview").innerHTML=""; document.getElementById("categoryModal").style.display="flex"; };
     window.closeCategoryModal = () => document.getElementById("categoryModal").style.display="none";
-    document.getElementById("saveCategoryBtn").onclick = () => { let n=document.getElementById("newCategoryName").value.trim(); if(!n) return showToast("Enter name"); let custom=document.getElementById("customIconInput").value.trim(); addCategory(n, custom||selectedIcon); closeCategoryModal(); };
+    document.getElementById("categoryImageFile").addEventListener("change", e => { const f=e.target.files && e.target.files[0]; const box=document.getElementById("categoryImagePreview"); box.innerHTML=""; if(!f)return; if(!f.type.startsWith("image/")){showToast("Please choose an image file");e.target.value="";return;} if(f.size>8*1024*1024){showToast("Image must be under 8 MB");e.target.value="";return;} const img=document.createElement("img"); img.style.cssText="width:120px;height:100px;object-fit:contain;border-radius:10px;margin-top:8px;background:#fff;border:1px solid #dbe3ef"; img.alt="Category preview"; img.src=URL.createObjectURL(f); box.appendChild(img); });
+    document.getElementById("saveCategoryBtn").onclick = async () => { const n=document.getElementById("newCategoryName").value.trim(); if(!n) return showToast("Enter category name"); const file=document.getElementById("categoryImageFile").files[0]; const btn=document.getElementById("saveCategoryBtn"); btn.disabled=true; try { let imageUrl=null; if(file){showToast("Uploading category image..."); imageUrl=await compressAndUpload(file); if(!imageUrl) throw new Error("Image upload did not return a URL");} await addCategory(n,"📁",imageUrl); closeCategoryModal(); } catch(err){showToast("Could not save category: "+(err.message||"upload error"));} finally {btn.disabled=false;} };
     document.getElementById("openCategoryBtn").onclick = openAddCategoryModal;
     
     // ===== SET TPIN - STYLISH =====
@@ -2540,20 +2555,5 @@
     startFirestoreListener();
     showUnlockIfNeeded().then(() => switchScreen('home'));
 </script>
-
-<script>
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", function () {
-      navigator.serviceWorker.register("/noman/sw.js")
-        .then(function (registration) {
-          console.log("Service Worker registered:", registration.scope);
-        })
-        .catch(function (error) {
-          console.error("Service Worker registration failed:", error);
-        });
-    });
-  }
-</script>
-
 </body>
 </html>
